@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard - Credit Karma Repair</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_BUCKET",
+      messagingSenderId: "YOUR_MSG_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    window.onload = () => {
+      auth.onAuthStateChanged(user => {
+        if (!user) {
+          alert("Please log in");
+          window.location.href = "index.html";
+        } else {
+          const uid = user.uid;
+          db.collection("users").doc(uid).get().then(doc => {
+            if (doc.exists) {
+              const data = doc.data();
+              document.getElementById("name").textContent = data.name;
+              document.getElementById("score").textContent = data.creditScore;
+              document.getElementById("loan").textContent = data.loanStatus;
+            }
+          });
+        }
+      });
+    };
+
+    function applyForLoan() {
+      const uid = auth.currentUser.uid;
+      db.collection("users").doc(uid).update({
+        loanStatus: "Application Submitted"
+      }).then(() => {
+        alert("Loan application submitted!");
+        document.getElementById("loan").textContent = "Application Submitted";
+      });
+    }
+  </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white font-sans">
+  <div class="max-w-2xl mx-auto mt-10 p-6 bg-white dark:bg-gray-800 rounded shadow">
+    <h1 class="text-3xl font-bold mb-4">Welcome, <span id="name"></span></h1>
+    <div class="mb-6">
+      <h2 class="text-xl font-semibold">Your Credit Score:</h2>
+      <p class="text-5xl font-bold text-green-500" id="score">---</p>
+    </div>
+    <div class="mb-6">
+      <h2 class="text-xl font-semibold">Loan Status:</h2>
+      <p id="loan" class="text-lg">---</p>
+    </div>
+    <button onclick="applyForLoan()" class="w-full bg-blue-600 text-white py-3 rounded text-lg font-semibold">
+      Apply for Loan
+    </button>
+  </div>
+</body>
+</html>

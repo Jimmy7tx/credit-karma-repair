@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Panel - Credit Karma Repair</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_BUCKET",
+      messagingSenderId: "YOUR_MSG_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    function updateUser() {
+      const uid = document.getElementById("uid").value;
+      const creditScore = parseInt(document.getElementById("creditScore").value);
+      const loanStatus = document.getElementById("loanStatus").value;
+
+      db.collection("users").doc(uid).update({
+        creditScore: creditScore,
+        loanStatus: loanStatus
+      }).then(() => {
+        alert("User data updated!");
+      }).catch(err => alert("Error: " + err.message));
+    }
+  </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white font-sans p-6">
+  <h1 class="text-3xl font-bold mb-4">Admin Dashboard</h1>
+  <div class="max-w-xl bg-white dark:bg-gray-800 p-6 rounded shadow">
+    <h2 class="text-xl mb-4 font-semibold">Edit User Info</h2>
+    <input id="uid" placeholder="User UID" class="w-full mb-3 p-2 border rounded" />
+    <input id="creditScore" type="number" placeholder="New Credit Score" class="w-full mb-3 p-2 border rounded" />
+    <select id="loanStatus" class="w-full mb-4 p-2 border rounded">
+      <option value="Not Applied">Not Applied</option>
+      <option value="Application Submitted">Application Submitted</option>
+      <option value="Approved">Approved</option>
+      <option value="Denied">Denied</option>
+    </select>
+    <button onclick="updateUser()" class="w-full bg-green-600 text-white py-2 rounded">Update User</button>
+  </div>
+</body>
+</html>

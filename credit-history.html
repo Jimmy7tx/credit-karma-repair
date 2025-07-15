@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard - Credit History</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_BUCKET",
+      messagingSenderId: "YOUR_MSG_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    window.onload = () => {
+      auth.onAuthStateChanged(user => {
+        if (!user) {
+          alert("Please log in");
+          window.location.href = "index.html";
+        } else {
+          const uid = user.uid;
+          db.collection("users").doc(uid).get().then(doc => {
+            if (doc.exists) {
+              const data = doc.data();
+              const history = data.history || [];
+              const labels = history.map(item => item.date);
+              const scores = history.map(item => item.score);
+              const ctx = document.getElementById('scoreChart').getContext('2d');
+              new Chart(ctx, {
+                type: 'line',
+                data: {
+                  labels: labels,
+                  datasets: [{
+                    label: 'Credit Score Over Time',
+                    data: scores,
+                    borderColor: 'rgba(34, 197, 94, 1)',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  scales: {
+                    y: {
+                      min: 300,
+                      max: 850
+                    }
+                  }
+                }
+              });
+            }
+          });
+        }
+      });
+    };
+  </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white p-6 font-sans">
+  <div class="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-6 rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">Credit Score History</h1>
+    <canvas id="scoreChart" class="w-full h-64"></canvas>
+  </div>
+</body>
+</html>
